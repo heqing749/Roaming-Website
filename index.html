@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>古建筑模型交互演示</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- 引入 Tween.js 动画库（必须在 module 之前，确保挂载到 window） -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/23.1.1/tween.umd.js"></script>
+
+    <!-- Three.js Import Map -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<!-- 使用指南弹窗 -->
+<div id="guide-overlay" class="guide-overlay">
+    <div class="guide-panel">
+        <button id="btn-close-guide" class="close-guide-btn">×</button>
+        
+        <h2 class="guide-title">🏛️ 古建筑模型交互指南</h2>
+        <p class="guide-subtitle">首次使用？花 30 秒了解如何操作</p>
+        
+        <div class="guide-content">
+            <!-- 1. 切换模型 -->
+            <div class="guide-section">
+                <div class="guide-icon">📂</div>
+                <div class="guide-text">
+                    <h4>切换模型</h4>
+                    <p>点击左上角<strong>「木构专题」</strong>菜单，在<strong>榫卯结构</strong>、<strong>斗拱结构</strong>、<strong>抬梁式构架</strong>之间切换。</p>
+                </div>
+            </div>
+
+            <!-- 2. 视角控制 -->
+           <!-- 原来： -->
+<div class="guide-section">
+    <div class="guide-icon">🖱️</div>
+    <div class="guide-text">
+        <h4>观察视角（电脑网页端）</h4>
+        <p>
+            <span class="key">左键拖拽</span> 旋转模型<br>
+            <span class="key">滚轮</span> 缩放远近<br>
+            <span class="key">右键拖拽</span> 平移位置
+        </p>
+    </div>
+</div>
+
+<!-- 改成： -->
+<div class="guide-section">
+    <div class="guide-icon">📱</div>
+    <div class="guide-text">
+        <h4>观察视角（手机网页端）</h4>
+        <p>
+            <span class="key">单指滑动</span> 旋转模型<br>
+            <span class="key">双指捏合</span> 缩放远近<br>
+            <span class="key">双指滑动</span> 平移位置
+        </p>
+    </div>
+</div>
+
+            <!-- 3. 热点交互 -->
+            <div class="guide-section">
+                <div class="guide-icon">🔶</div>
+                <div class="guide-text">
+                    <h4>查看构件</h4>
+                    <p>点击模型上的<strong style="color:#ffaa00">橙色热点</strong>，查看该构件的名称、功能与说明。再次点击空白处关闭。</p>
+                </div>
+            </div>
+
+            <!-- 4. 显示模式 -->
+            <div class="guide-section">
+                <div class="guide-icon">👁️</div>
+                <div class="guide-text">
+                    <h4>显示模式</h4>
+                    <p>左侧下方可切换<strong>实体</strong> / <strong>线框</strong> / <strong>X光</strong>三种显示方式。X光模式可透视被遮挡的内部结构。</p>
+                </div>
+            </div>
+
+            <!-- 5. 拆解视图（榫卯专用） -->
+            <div class="guide-section highlight">
+                <div class="guide-icon">💥</div>
+                <div class="guide-text">
+                    <h4>拆解视图 <span class="badge">榫卯、斗拱专用</span></h4>
+                    <p>浏览<strong>榫卯结构</strong>时，点击底部<strong>「拆解视图」</strong>按钮，构件会自动向外散开，展示内部咬合关系。点击<strong>「复原」</strong>重新组装。</p>
+                </div>
+            </div>
+
+            <!-- 6. 自动演示 -->
+            <div class="guide-section">
+                <div class="guide-icon">▶️</div>
+                <div class="guide-text">
+                    <h4>自动演示</h4>
+                    <p>点击底部<strong>「开始演示」</strong>进入暂停模式<strong>「已暂停」</strong>恢复手动控制。</p>
+                </div>
+            </div>
+            <!-- 【新增】7. 周边产品 -->
+            <div class="guide-section highlight">
+                <div class="guide-icon">🛒</div>
+                <div class="guide-text">
+                    <h4>周边产品 <span class="badge">新功能</span></h4>
+                    <p>左侧下方<strong>「周边产品」</strong>区分为两类：</p>
+                    <p>
+                        <span class="key">🧩 3D 产品</span> 可拼装的实体积木/笔筒/手办<br>
+                        <span class="key">📚 平面产品</span> 贴纸/吧唧/手提袋/安装说明书
+                    </p>
+                    <p>点击任意产品可查看详情、材质规格与参考价格，点击<strong>「查看大图」</strong>可放大浏览。</p>
+                </div>
+</div>
+        </div>
+
+        <div class="guide-footer">
+            <label class="guide-checkbox">
+                <input type="checkbox" id="guide-never-show"> 下次不再显示
+            </label>
+            <button id="btn-start-use" class="guide-start-btn">开始使用</button>
+        </div>
+    </div>
+</div>
+
+<!-- 右下角帮助按钮（关闭后仍可唤起） -->
+<button id="btn-help" class="help-fab" title="查看使用指南">?</button>
+
+<!-- 产品详情面板 -->
+<div id="product-overlay" class="product-overlay"></div>
+<div id="product-panel" class="product-panel">
+    <div class="product-panel-header">
+        <h3 id="product-title" class="product-panel-title">产品名称</h3>
+        <button id="btn-close-product" class="btn-close-product">×</button>
+    </div>
+    <div id="product-img" class="product-img">🧱</div>
+    <p id="product-desc" class="product-desc">产品描述...</p>
+    <div class="product-meta">
+        <div class="product-meta-row">
+            <span class="product-meta-label">材质</span>
+            <span id="product-material" class="product-meta-value">-</span>
+        </div>
+        <div class="product-meta-row">
+            <span class="product-meta-label">规格</span>
+            <span id="product-spec" class="product-meta-value">-</span>
+        </div>
+        <div class="product-meta-row">
+            <span class="product-meta-label">参考价格</span>
+            <span id="product-price" class="product-meta-value">-</span>
+        </div>
+    </div>
+    <button id="product-link" class="product-link">🔍 查看大图</button>
+</div>
+<!-- 图片放大查看层 -->
+<div id="image-zoom-overlay" class="image-zoom-overlay">
+    <button id="btn-close-zoom" class="btn-close-zoom">×</button>
+    <img id="image-zoom-img" src="" alt="产品大图">
+    <p id="image-zoom-caption" class="image-zoom-caption"></p>
+</div>
+
+<body>
+    <div id="canvas-container"></div>
+    <button id="btn-menu-toggle" class="menu-toggle">☰</button>
+    <div id="ui-layer">
+        <!-- 移动端菜单按钮（放在 sidebar 前面） -->
+        
+        <div class="sidebar" id="sidebar">
+            <h2 class="title">木构专题</h2>
+            <button class="menu-btn active" data-model="sunmao">榫卯结构</button>
+            <button class="menu-btn" data-model="dougong">斗拱结构</button>
+            <button class="menu-btn" data-model="tailiang">抬梁式构架</button>
+                    <!-- 周边产品展示区 -->
+<div class="product-group">
+    <h3 class="sub-title">周边产品</h3>
+    
+    <!-- 3D 产品 -->
+    <div class="product-category">
+        <h4 class="category-title">🧩 3D 产品</h4>
+        <div class="product-list">
+            <div class="product-item" data-product="building-blocks" data-type="3d">
+                <span class="product-name">榫卯拼装模型</span>
+            </div>
+            <div class="product-item" data-product="dougongg-model" data-type="3d">
+                
+                <span class="product-name">斗拱拼装模型（基础）</span>
+            </div>
+            <div class="product-item" data-product="dougong-model" data-type="3d">
+                
+                <span class="product-name">斗拱拼装模型（进阶）</span>
+            </div>
+            <div class="product-item" data-product="tailiangshigoujia-model" data-type="3d">
+                
+                <span class="product-name">抬梁式构架拼装模型</span>
+            </div>
+            <div class="product-item" data-product="3Dshouban-model" data-type="3d">
+              
+                <span class="product-name">3D手办</span>
+            </div>
+            <div class="product-item" data-product="muxiaohebitong-model" data-type="3d">
+               
+                <span class="product-name">“木小和”笔筒</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 平面产品 -->
+    <div class="product-category">
+        <h4 class="category-title"> 📄平面产品</h4>
+        <div class="product-list">
+            <div class="product-item" data-product="tiezhi" data-type="flat">
+              
+                <span class="product-name">贴纸</span>
+            </div>
+            <div class="product-item" data-product="baji" data-type="flat">
+              
+                <span class="product-name">吧唧</span>
+            </div>
+            <div class="product-item" data-product="shoutidai" data-type="flat">
+             
+                <span class="product-name">手提袋</span>
+            </div>
+            <div class="product-item" data-product="anzhuangshuomingshu" data-type="flat">
+              
+                <span class="product-name">安装说明书</span>
+            </div>
+        </div>
+    </div>
+</div>
+            <!-- 新增：显示模式分组 -->
+        <div class="mode-group">
+            <h3 class="sub-title">显示模式</h3>
+            <button class="mode-btn active" data-mode="solid">实体</button>
+            <button class="mode-btn" data-mode="wireframe">线框</button>
+            <button class="mode-btn" data-mode="xray">X光</button>
+    </div>
+        </div>
+        <!-- 遮罩层（放在 sidebar 后面） -->
+        <div id="sidebar-overlay" class="sidebar-overlay"></div>
+        <div id="help-tip" class="help-tip">
+            💡 <strong>操作提示：</strong>点击模型上的 <span style="color: #ffaa00;">橙色热点</span> 查看构件信息。
+            <button id="btn-close-tip" class="close-tip-btn">×</button>
+        </div>
+
+        <div class="bottom-bar">
+            <button id="btn-reset" class="control-btn">↺ 重置视角</button>
+            <button id="btn-pause" class="control-btn disabled">已暂停</button>
+            <button id="btn-play" class="control-btn highlight">开始演示</button>
+            <button id="btn-explode" class="control-btn">拆解视图</button>
+            <button id="btn-restore" class="control-btn disabled">↩ 复原</button>
+           
+        </div>
+
+        <div id="loader" class="loader-wrapper hidden">
+    <div class="loader-spinner"></div>
+</div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>
